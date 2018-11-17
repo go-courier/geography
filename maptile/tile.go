@@ -74,7 +74,7 @@ func (t *MapTile) NewTransform(extent uint32) geography.Transform {
 	}
 }
 
-func (t *MapTile) Bound() geography.Bound {
+func (t *MapTile) BBox() geography.Bound {
 	buffer := 0.0
 	x := float64(t.X)
 	y := float64(t.Y)
