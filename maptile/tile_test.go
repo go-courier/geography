@@ -20,7 +20,12 @@ func TestTile(t *testing.T) {
 	require.Equal(t, geography.Point{0, 4096}, mt.NewTransform(4096)(min))
 	require.Equal(t, geography.Point{4096, 0}, mt.NewTransform(4096)(max))
 
-	mt.AddTileLayers(LayerPoi{})
+	mt.AddTileLayers(
+		LayerPoi{N: "1"},
+		LayerPoi{N: "2"},
+		LayerPoi{N: "3"},
+		LayerPoi{N: "4"},
+	)
 
 	v, _ := mvt.ToMVT(mt)
 	tile := vector_tile.Tile{}
@@ -40,32 +45,33 @@ func TestTile(t *testing.T) {
 		for j := range layer.Features {
 			f := layer.Features[j]
 			fmt.Printf("\t\t%v\n", f.Type)
-			fmt.Printf("\t\t%v\n", f.Tags)
+			fmt.Printf("\t\t%v\n", f.Geometry)
 		}
 	}
 }
 
 type LayerPoi struct {
+	N string
 }
 
-func (LayerPoi) Name() string {
-	return "poi"
+func (p LayerPoi) Name() string {
+	return "poi" + p.N
 }
 
 func (LayerPoi) Features(tile *MapTile) ([]Feature, error) {
 	return []Feature{
-		FeaturePoi{Point: geography.Point{1, 1}},
-		FeaturePoi{Point: geography.Point{1, 2}},
-		FeaturePoi{Point: geography.Point{1, 3}},
+		FeaturePoi{Geom: geography.Point{110, 20}},
+		FeaturePoi{Geom: geography.LineString{{110, 22}, {111, 23}}},
+		FeaturePoi{Geom: geography.Polygon{{{110, 24}, {110, 24}, {110, 24}}}},
 	}, nil
 }
 
 type FeaturePoi struct {
-	geography.Point
+	geography.Geom
 }
 
 func (w FeaturePoi) ToGeom() geography.Geom {
-	return w.Point
+	return w.Geom
 }
 
 func (FeaturePoi) Properties() map[string]interface{} {

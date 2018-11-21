@@ -4,6 +4,7 @@ import (
 	"github.com/go-courier/geography"
 	"github.com/go-courier/geography/encoding/mvt"
 	"math"
+	"sync"
 )
 
 func NewMapTile(z, x, y uint32) *MapTile {
@@ -108,18 +109,40 @@ func (t *MapTile) AddLayers(layers ...*Layer) {
 	t.Layers = append(t.Layers, layers...)
 }
 
-func (t *MapTile) AddTileLayers(tileLayers ...TileLayer) error {
+func (t *MapTile) AddTileLayers(tileLayers ...TileLayer) (e error) {
+	wg := sync.WaitGroup{}
+
+	result := make(chan interface{})
+	wg.Add(len(tileLayers))
+
 	for i := range tileLayers {
-		tileLayer := tileLayers[i]
-		g, err := tileLayer.Features(t)
-		if err != nil {
-			return err
-		}
-		extend := uint32(0)
-		if tileLayerExtentConf, ok := tileLayer.(TileLayerExtentConf); ok {
-			extend = tileLayerExtentConf.Extent()
-		}
-		t.AddLayers(NewLayer(tileLayer.Name(), extend, g...))
+		go func(tileLayer TileLayer) {
+			g, err := tileLayer.Features(t)
+			if err != nil {
+				result <- err
+				return
+			}
+			extend := uint32(0)
+			if tileLayerExtentConf, ok := tileLayer.(TileLayerExtentConf); ok {
+				extend = tileLayerExtentConf.Extent()
+			}
+			result <- NewLayer(tileLayer.Name(), extend, g...)
+		}(tileLayers[i])
 	}
-	return nil
+
+	go func() {
+		wg.Wait()
+		close(result)
+	}()
+
+	for r := range result {
+		switch v := r.(type) {
+		case error:
+			e = v
+		case *Layer:
+			t.AddLayers(v)
+		}
+		wg.Done()
+	}
+	return
 }
