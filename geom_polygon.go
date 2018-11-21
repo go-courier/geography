@@ -117,21 +117,11 @@ func (p Polygon) Cap() int {
 
 func (p Polygon) DrawFeature(w *mvt.FeatureWriter) {
 	for _, ls := range p {
-		w.MoveTo(1, func(i int) mvt.Coord {
-			return ls[0]
-		})
-		if ls.Closed() {
-			points := ls[1 : len(ls)-1]
-			w.LineTo(len(points), func(i int) mvt.Coord {
-				return points[i]
-			})
-		} else {
-			points := ls[1:]
-			w.LineTo(len(points), func(i int) mvt.Coord {
-				return points[i]
-			})
+		ls.DrawFeature(w)
+		if !ls.Closed() && ls.IsValid() {
+			// force close path
+			w.ClosePath()
 		}
-		w.ClosePath()
 	}
 }
 

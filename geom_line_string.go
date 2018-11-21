@@ -76,7 +76,19 @@ func (ls *LineString) UnmarshalWKB(r *wkb.WKBReader, order binary.ByteOrder, tpe
 	return nil
 }
 
+func (ls LineString) IsValid() bool {
+	n := len(ls)
+	if ls.Closed() {
+		return n >= 3
+	}
+	return n >= 2
+}
+
 func (ls LineString) DrawFeature(w *mvt.FeatureWriter) {
+	if !ls.IsValid() {
+		return
+	}
+
 	w.MoveTo(1, func(i int) mvt.Coord {
 		return ls[0]
 	})
