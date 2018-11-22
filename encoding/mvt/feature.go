@@ -1,8 +1,9 @@
 package mvt
 
 import (
-	"github.com/go-courier/geography/encoding/mvt/vector_tile"
 	"strings"
+
+	"github.com/go-courier/geography/encoding/mvt/vector_tile"
 )
 
 type FeatureMarshaller interface {

@@ -5,10 +5,11 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"strconv"
+
 	"github.com/go-courier/geography/encoding/mvt"
 	"github.com/go-courier/geography/encoding/wkb"
 	"github.com/go-courier/geography/encoding/wkt"
-	"strconv"
 )
 
 type Point [2]float64

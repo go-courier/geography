@@ -1,10 +1,12 @@
 package maptile
 
 import (
-	"github.com/go-courier/geography"
-	"github.com/go-courier/geography/encoding/mvt"
 	"math"
 	"sync"
+
+	"github.com/go-courier/geography/encoding/mvt"
+
+	"github.com/go-courier/geography"
 )
 
 func NewMapTile(z, x, y uint32) *MapTile {

@@ -2,12 +2,14 @@ package maptile
 
 import (
 	"fmt"
-	"github.com/go-courier/geography"
+	"testing"
+
 	"github.com/go-courier/geography/encoding/mvt"
 	"github.com/go-courier/geography/encoding/mvt/vector_tile"
 	"github.com/golang/protobuf/proto"
 	"github.com/stretchr/testify/require"
-	"testing"
+
+	"github.com/go-courier/geography"
 )
 
 func TestTile(t *testing.T) {
@@ -56,6 +58,12 @@ type LayerPoi struct {
 
 func (p LayerPoi) Name() string {
 	return "poi" + p.N
+}
+
+func (LayerPoi) Fields() map[string]FieldType {
+	return map[string]FieldType{
+		"name": FieldTypeString,
+	}
 }
 
 func (LayerPoi) Features(tile *MapTile) ([]Feature, error) {

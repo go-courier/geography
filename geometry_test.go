@@ -2,9 +2,9 @@ package geography
 
 import (
 	"database/sql/driver"
-	"github.com/davecgh/go-spew/spew"
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/go-courier/sqlx/v2"
 	"github.com/go-courier/sqlx/v2/builder"
 	"github.com/go-courier/sqlx/v2/migration"

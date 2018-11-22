@@ -1,6 +1,8 @@
 package geography
 
-import "math"
+import (
+	"math"
+)
 
 const (
 	// https://epsg.io/3857

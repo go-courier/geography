@@ -3,9 +3,10 @@ package geography
 import (
 	"database/sql/driver"
 	"encoding/binary"
+	"strconv"
+
 	"github.com/go-courier/geography/encoding/wkb"
 	"github.com/go-courier/geography/encoding/wkt"
-	"strconv"
 )
 
 func ToGeometry(g Geom) Geometry {

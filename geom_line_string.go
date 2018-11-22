@@ -4,9 +4,9 @@ import (
 	"database/sql/driver"
 	"encoding/binary"
 	"errors"
-	"github.com/go-courier/geography/encoding/mvt"
 	"strconv"
 
+	"github.com/go-courier/geography/encoding/mvt"
 	"github.com/go-courier/geography/encoding/wkb"
 	"github.com/go-courier/geography/encoding/wkt"
 )

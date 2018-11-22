@@ -4,10 +4,11 @@ import (
 	"database/sql/driver"
 	"encoding/binary"
 	"errors"
+	"strconv"
+
 	"github.com/go-courier/geography/encoding/mvt"
 	"github.com/go-courier/geography/encoding/wkb"
 	"github.com/go-courier/geography/encoding/wkt"
-	"strconv"
 )
 
 type MultiPoint []Point

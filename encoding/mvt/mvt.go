@@ -5,6 +5,7 @@ import (
 	"encoding"
 	"encoding/binary"
 	"fmt"
+
 	"github.com/go-courier/geography/encoding/mvt/vector_tile"
 	"github.com/go-courier/ptr"
 	"github.com/golang/protobuf/proto"
@@ -26,7 +27,7 @@ func ToMVT(v MVTMarshaller) (*MVT, error) {
 }
 
 type MVTMarshaller interface {
-	MarshalMVT(w *MVTWriter) (error)
+	MarshalMVT(w *MVTWriter) error
 }
 
 type MVTWriter struct {

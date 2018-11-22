@@ -1,6 +1,8 @@
 package maptile
 
-import "github.com/go-courier/geography"
+import (
+	"github.com/go-courier/geography"
+)
 
 type Feature interface {
 	ToGeom() geography.Geom
@@ -9,6 +11,7 @@ type Feature interface {
 
 type TileLayer interface {
 	Name() string
+	Fields() map[string]FieldType
 	Features(tile *MapTile) ([]Feature, error)
 }
 

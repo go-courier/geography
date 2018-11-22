@@ -2,8 +2,9 @@ package geography
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestPseudoMercatorToWGS84(t *testing.T) {
