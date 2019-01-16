@@ -20,7 +20,7 @@ func StructToFields(v interface{}) map[string]FieldType {
 		ft := structType.Field(i)
 		name, ok := ft.Tag.Lookup("name")
 		if ok {
-			name = strings.SplitN(name, ",", 1)[0]
+			name = strings.SplitN(name, ",", 2)[0]
 		}
 
 		if name == "" {
@@ -55,7 +55,7 @@ func StructToProperties(v interface{}) map[string]interface{} {
 		omitempty := false
 		if ok {
 			omitempty = strings.Contains(name, "omitempty")
-			name = strings.SplitN(name, ",", 1)[0]
+			name = strings.SplitN(name, ",", 2)[0]
 		}
 
 		if name == "" {

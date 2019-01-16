@@ -8,23 +8,23 @@ import (
 
 type LayerXXAttrs struct {
 	Class string  `name:"class"`
-	Ele   float64 `name:"ele"`
-	Is    bool    `:"bool"`
+	Ele   float64 `name:""`
+	Is    bool    `name:"bool,omitempty"`
 }
 
 func TestStructToFields(t *testing.T) {
 	require.Equal(t, map[string]FieldType{
 		"class": FieldTypeString,
-		"ele":   FieldTypeNumber,
-		"Is":  FieldTypeBoolean,
+		"Ele":   FieldTypeNumber,
+		"bool":  FieldTypeBoolean,
 	}, StructToFields(LayerXXAttrs{}))
 }
 
 func TestStructToProperties(t *testing.T) {
 	require.Equal(t, map[string]interface{}{
 		"class": "test",
-		"ele":   float64(11),
-		"Is":  true,
+		"Ele":   float64(11),
+		"bool":  true,
 	}, StructToProperties(LayerXXAttrs{
 		Class: "test",
 		Ele:   11,
