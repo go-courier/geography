@@ -3,6 +3,7 @@ package maptile
 import (
 	"math"
 	"reflect"
+	"strings"
 
 	"github.com/go-courier/reflectx"
 
@@ -46,7 +47,13 @@ func StructToProperties(v interface{}) map[string]interface{} {
 		ft := typ.Field(i)
 		name, ok := ft.Tag.Lookup("name")
 		if ok {
-			props[name] = s.Field(i).Interface()
+			omitempty := strings.Contains(name, "omitempty")
+			name := strings.SplitN(name, ",", 1)[0]
+			v := s.Field(i).Interface()
+			if omitempty && reflectx.IsEmptyValue(v) {
+				continue
+			}
+			props[name] = v
 		}
 	}
 	return props

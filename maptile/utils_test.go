@@ -31,3 +31,14 @@ func TestStructToProperties(t *testing.T) {
 		Is:    true,
 	}))
 }
+
+type LayerXXAttrsWithOmitempty struct {
+	Class string  `name:"class,omitempty"`
+	Ele   float64 `name:"ele,omitempty"`
+	Is    bool    `name:"bool,omitempty"`
+}
+
+func TestStructToPropertiesWithOmitEmpty(t *testing.T) {
+	require.Equal(t, map[string]interface{}{}, StructToProperties(LayerXXAttrsWithOmitempty{
+	}))
+}
