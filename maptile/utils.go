@@ -20,16 +20,22 @@ func StructToFields(v interface{}) map[string]FieldType {
 		ft := structType.Field(i)
 		name, ok := ft.Tag.Lookup("name")
 		if ok {
-			switch ft.Type.Kind() {
-			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-				reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
-				reflect.Float32, reflect.Float64:
-				fields[name] = FieldTypeNumber
-			case reflect.String:
-				fields[name] = FieldTypeString
-			case reflect.Bool:
-				fields[name] = FieldTypeBoolean
-			}
+			name = strings.SplitN(name, ",", 1)[0]
+		}
+
+		if name == "" {
+			name = ft.Name
+		}
+
+		switch ft.Type.Kind() {
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+			reflect.Float32, reflect.Float64:
+			fields[name] = FieldTypeNumber
+		case reflect.String:
+			fields[name] = FieldTypeString
+		case reflect.Bool:
+			fields[name] = FieldTypeBoolean
 		}
 	}
 
@@ -46,15 +52,21 @@ func StructToProperties(v interface{}) map[string]interface{} {
 	for i := 0; i < s.NumField(); i++ {
 		ft := typ.Field(i)
 		name, ok := ft.Tag.Lookup("name")
+		omitempty := false
 		if ok {
-			omitempty := strings.Contains(name, "omitempty")
-			name := strings.SplitN(name, ",", 1)[0]
-			v := s.Field(i).Interface()
-			if omitempty && reflectx.IsEmptyValue(v) {
-				continue
-			}
-			props[name] = v
+			omitempty = strings.Contains(name, "omitempty")
+			name = strings.SplitN(name, ",", 1)[0]
 		}
+
+		if name == "" {
+			name = ft.Name
+		}
+
+		v := s.Field(i).Interface()
+		if omitempty && reflectx.IsEmptyValue(v) {
+			continue
+		}
+		props[name] = v
 	}
 	return props
 }

@@ -9,14 +9,14 @@ import (
 type LayerXXAttrs struct {
 	Class string  `name:"class"`
 	Ele   float64 `name:"ele"`
-	Is    bool    `name:"bool"`
+	Is    bool    `:"bool"`
 }
 
 func TestStructToFields(t *testing.T) {
 	require.Equal(t, map[string]FieldType{
 		"class": FieldTypeString,
 		"ele":   FieldTypeNumber,
-		"bool":  FieldTypeBoolean,
+		"Is":  FieldTypeBoolean,
 	}, StructToFields(LayerXXAttrs{}))
 }
 
@@ -24,7 +24,7 @@ func TestStructToProperties(t *testing.T) {
 	require.Equal(t, map[string]interface{}{
 		"class": "test",
 		"ele":   float64(11),
-		"bool":  true,
+		"Is":  true,
 	}, StructToProperties(LayerXXAttrs{
 		Class: "test",
 		Ele:   11,
@@ -35,7 +35,7 @@ func TestStructToProperties(t *testing.T) {
 type LayerXXAttrsWithOmitempty struct {
 	Class string  `name:"class,omitempty"`
 	Ele   float64 `name:"ele,omitempty"`
-	Is    bool    `name:"bool,omitempty"`
+	Is    bool    `name:",omitempty"`
 }
 
 func TestStructToPropertiesWithOmitEmpty(t *testing.T) {
