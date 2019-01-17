@@ -18,10 +18,20 @@ func NewMapTile(z, x, y uint32) *MapTile {
 }
 
 type MapTile struct {
-	Z      uint32
-	X      uint32
-	Y      uint32
-	Layers []*Layer
+	coordsTransform CoordsTransform
+	Z               uint32
+	X               uint32
+	Y               uint32
+	Layers          []*Layer
+}
+
+type CoordsTransform interface {
+	ToEarth(point geography.Point) geography.Point
+	ToMars(point geography.Point) geography.Point
+}
+
+func (t *MapTile) SetCoordsTransform(coordsTransform CoordsTransform) {
+	t.coordsTransform = coordsTransform
 }
 
 func (t *MapTile) MarshalMVT(w *mvt.MVTWriter) error {
@@ -69,6 +79,9 @@ func (t *MapTile) NewTransform(extent uint32) geography.Transform {
 	miny := float64(t.Y << n)
 
 	return func(p geography.Point) geography.Point {
+		if t.coordsTransform != nil {
+			p = t.coordsTransform.ToMars(p)
+		}
 		x, y := lonLatToPixelXY(p[0], p[1], z)
 		return geography.Point{
 			math.Floor(x - minx),
@@ -100,6 +113,13 @@ func (t *MapTile) BBox() geography.Bound {
 	}
 
 	lon2, lat2 := geography.TileXYToLonLat(maxX, maxY, uint32(t.Z))
+
+	if t.coordsTransform != nil {
+		return geography.Bound{
+			Min: t.coordsTransform.ToEarth(geography.Point{lon1, lat2}),
+			Max: t.coordsTransform.ToEarth(geography.Point{lon2, lat1}),
+		}
+	}
 
 	return geography.Bound{
 		Min: geography.Point{lon1, lat2},

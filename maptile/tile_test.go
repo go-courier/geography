@@ -2,6 +2,7 @@ package maptile
 
 import (
 	"fmt"
+	"github.com/go-courier/geography/coordstransform"
 	"testing"
 
 	"github.com/go-courier/geography/encoding/mvt"
@@ -48,6 +49,31 @@ func TestTile(t *testing.T) {
 			f := layer.Features[j]
 			fmt.Printf("\t\t%v\n", f.Type)
 			fmt.Printf("\t\t%v\n", f.Geometry)
+		}
+	}
+
+	{
+		mt.SetCoordsTransform(coordstransform.CoordsTransform{})
+		v, _ := mvt.ToMVT(mt)
+		tile := vector_tile.Tile{}
+		if err := proto.Unmarshal(v.Bytes(), &tile); err != nil {
+			panic(err)
+		}
+
+		for i := range tile.Layers {
+			layer := tile.Layers[i]
+
+			fmt.Printf("%s\n", *layer.Name)
+			fmt.Printf("\t%d\n", *layer.Version)
+
+			fmt.Printf("\t%v\n", layer.Keys)
+			fmt.Printf("\t%v\n", layer.Values)
+
+			for j := range layer.Features {
+				f := layer.Features[j]
+				fmt.Printf("\t\t%v\n", f.Type)
+				fmt.Printf("\t\t%v\n", f.Geometry)
+			}
 		}
 	}
 }
