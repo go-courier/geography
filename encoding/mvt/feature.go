@@ -17,6 +17,7 @@ type Coord interface {
 }
 
 type Feature struct {
+	ID         uint64
 	Type       string
 	Geometry   []uint32
 	Properties map[string]interface{}

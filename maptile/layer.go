@@ -5,6 +5,7 @@ import (
 )
 
 type Feature interface {
+	ID() uint64
 	ToGeom() geography.Geom
 	Properties() map[string]interface{}
 }

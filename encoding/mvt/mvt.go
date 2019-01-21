@@ -72,9 +72,11 @@ func (w *MVTWriter) WriteLayer(name string, extent uint32, features ...*Feature)
 			if f == nil {
 				continue
 			}
+			id := f.ID
 			geomType := f.GeomType()
 
 			feat := &vector_tile.Tile_Feature{
+				Id:       &id,
 				Type:     &geomType,
 				Geometry: f.Geometry,
 			}

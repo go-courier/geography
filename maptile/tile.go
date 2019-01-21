@@ -56,6 +56,7 @@ func (t *MapTile) MarshalMVT(w *mvt.MVTWriter) error {
 			g := geo.Project(t.NewTransform(layer.Extent))
 
 			f := &mvt.Feature{
+				ID:         feat.ID(),
 				Type:       g.Type(),
 				Geometry:   g.Geometry(),
 				Properties: feat.Properties(),

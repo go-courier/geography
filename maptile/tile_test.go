@@ -104,6 +104,10 @@ type FeaturePoi struct {
 	geography.Geom
 }
 
+func (FeaturePoi) ID() uint64  {
+	return 1
+}
+
 func (w FeaturePoi) ToGeom() geography.Geom {
 	return w.Geom
 }
