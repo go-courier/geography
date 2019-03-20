@@ -117,7 +117,6 @@ func (fc *FeatureCollection) UnmarshalText(data []byte) error {
 	}
 
 	return decodeFeatureCollection(fc, object)
-
 }
 
 func decodeFeatureCollection(fc *FeatureCollection, object map[string]interface{}) error {
