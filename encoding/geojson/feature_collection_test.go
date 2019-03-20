@@ -1,17 +1,18 @@
-package geojson
+package geojson_test
 
 import (
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-courier/geography"
 	"github.com/go-courier/geography/coordstransform"
+	"github.com/go-courier/geography/encoding/geojson"
 	"github.com/go-courier/geography/maptile"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestNewFeatureCollection(t *testing.T) {
-	fc := NewFeatureCollection()
+	fc := geojson.NewFeatureCollection()
 
 	if fc.Type != "FeatureCollection" {
 		t.Errorf("should have type of FeatureCollection, got %v", fc.Type)
@@ -19,7 +20,7 @@ func TestNewFeatureCollection(t *testing.T) {
 }
 
 func TestFeatureCollectionToJSON(t *testing.T) {
-	fc := NewFeatureCollection()
+	fc := geojson.NewFeatureCollection()
 
 	fc.SetCoordsTransform(&coordstransform.CoordsTransform{})
 
@@ -55,155 +56,10 @@ func (*FeaturePoi) Properties() map[string]interface{} {
 	}
 }
 
-func TestUnmarshalFeatureCollection(t *testing.T) {
-	rawJSON := `
-{
-    "type": "FeatureCollection",
-    "features": [
-        {
-            "id": 1,
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    110.00424010553802,
-                    19.997877614004096
-                ]
-            },
-            "properties": {
-                "age": 11,
-                "name": "张三",
-                "sex": "男"
-            }
-        },
-        {
-            "id": 1,
-            "type": "Feature",
-            "geometry": {
-                "type": "LineString",
-                "coordinates": [
-                    [
-                        110.00434539290096,
-                        21.99724189683811
-                    ],
-                    [
-                        111.0048398494024,
-                        22.997247735807395
-                    ]
-                ]
-            },
-            "properties": {
-                "age": 11,
-                "name": "张三",
-                "sex": "男"
-            }
-        },
-        {
-            "id": 1,
-            "type": "Feature",
-            "geometry": {
-                "type": "Polygon",
-                "coordinates": [
-                    [
-                        [
-                            110.00445903309571,
-                            23.997262049847986
-                        ],
-                        [
-                            110.00445903309571,
-                            23.997262049847986
-                        ],
-                        [
-                            110.00445903309571,
-                            23.997262049847986
-                        ]
-                    ]
-                ]
-            },
-            "properties": {
-                "age": 11,
-                "name": "张三",
-                "sex": "男"
-            }
-        }
-    ]
-}`
-
-	fc, err := UnmarshalFeatureCollection([]byte(rawJSON))
-	spew.Dump(fc)
-	if err != nil {
-		t.Fatalf("unmarshal feature collection without issue, err %v", err)
-	}
-
-	if fc.Type != "FeatureCollection" {
-		t.Errorf("should have type of FeatureCollection, got %v", fc.Type)
-	}
-
-	if len(fc.Features) != 3 {
-		t.Errorf("should have 3 features but got %d", len(fc.Features))
-	}
-}
-
-func TestUnmarshalFeatureCollection2(t *testing.T) {
-	var rawJSON = `{
-    "type": "FeatureCollection",
-    "features": [
-        {
-            "id": 4182641,
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    116.68759999999999,
-                    39.891329999999996
-                ]
-            },
-            "properties": {
-                "PM10": "325.0",
-                "PM2_5": "209.0",
-                "VEHICLE_DIRECTION": "278.0",
-                "VEHICLE_SPEED": "0.0",
-                "collectTime": "2019-03-19T06:02:32+08:00",
-                "deviceID": "B600-01E4",
-                "name": "京B-7Y686",
-                "plateNO": "京B-7Y686"
-            }
-        },
-        {
-            "id": 4182629,
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [
-                    116.67637,
-                    39.89466
-                ]
-            },
-            "properties": {
-                "PM10": "285.0",
-                "PM2_5": "185.0",
-                "VEHICLE_DIRECTION": "356.0",
-                "VEHICLE_SPEED": "1.0",
-                "collectTime": "2019-03-19T06:05:18+08:00",
-                "deviceID": "B600-01DA",
-                "name": "京B-7Y477",
-                "plateNO": "京B-7Y477"
-            }
-        }
-    ]
-}
-`
-
-	fc, err := UnmarshalFeatureCollection([]byte(rawJSON))
-	require.NoError(t, err)
-	spew.Dump(fc)
-}
-
-func TestUnmarshalFeatureCollection3(t *testing.T) {
+func TestFeatureCollection_UnmarshalText(t *testing.T) {
 	var rawJSON = `
 {
     "type": "FeatureCollection",
-    "name": "CountryPolygon",
     "crs": {
         "type": "name",
         "properties": {
@@ -222,13 +78,19 @@ func TestUnmarshalFeatureCollection3(t *testing.T) {
                         [113.938476562500043,34.863281250000014]
                     ]
                 ]
-            }
+            },
+			"crs":{
+				"type":"name"
+			}
         }
     ]
 }
 `
-
-	fc, err := UnmarshalFeatureCollection([]byte(rawJSON))
+	fc := geojson.NewFeatureCollection()
+	err := fc.UnmarshalText([]byte(rawJSON))
 	require.NoError(t, err)
 	spew.Dump(fc)
+	str, err := fc.ToJSON()
+	require.NoError(t, err)
+	fmt.Println(string(str))
 }

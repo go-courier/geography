@@ -60,14 +60,17 @@ func (g *Geometry) UnmarshalJSON(data []byte) error {
 	return decodeGeometry(g, object)
 }
 
-func UnmarshalGeometry(data []byte) (*Geometry, error) {
-	g := &Geometry{}
-	err := json.Unmarshal(data, g)
-	if err != nil {
-		return nil, err
-	}
+func (g Geometry) MarshalText() ([]byte, error) {
+	return g.MarshalJSON()
+}
 
-	return g, nil
+func (g *Geometry) UnmarshalText(data []byte) error {
+	var object map[string]interface{}
+	err := json.Unmarshal(data, &object)
+	if err != nil {
+		return err
+	}
+	return decodeGeometry(g, object)
 }
 
 func decodeGeometry(g *Geometry, object map[string]interface{}) error {

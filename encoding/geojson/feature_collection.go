@@ -2,6 +2,7 @@ package geojson
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/go-courier/geography"
 	"github.com/go-courier/geography/coordstransform"
 	"github.com/go-courier/geography/maptile"
@@ -35,7 +36,7 @@ func (fc *FeatureCollection) AddMapTileFeature(features ...maptile.Feature) *Fea
 
 func (fc *FeatureCollection) addMapTileFeature(feature maptile.Feature) *FeatureCollection {
 	feat := feature.ToGeom()
-	geo := Geometry{
+	geo := &Geometry{
 		Type: feat.Type(),
 	}
 
@@ -68,7 +69,6 @@ func (fc *FeatureCollection) addMapTileFeature(feature maptile.Feature) *Feature
 		polygon, _ := feat.(geography.MultiPolygon)
 		geo.MultiPolygon = &polygon
 		break
-
 	}
 
 	fe := &Feature{
@@ -105,12 +105,60 @@ func (fc *FeatureCollection) ToJSON() ([]byte, error) {
 	return fc.MarshalJSON()
 }
 
-func UnmarshalFeatureCollection(data []byte) (*FeatureCollection, error) {
-	fc := &FeatureCollection{}
-	err := json.Unmarshal(data, fc)
+func (fc FeatureCollection) MarshalText() ([]byte, error) {
+	return fc.ToJSON()
+}
+
+func (fc *FeatureCollection) UnmarshalText(data []byte) error {
+	var object map[string]interface{}
+	err := json.Unmarshal(data, &object)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return fc, nil
+	return decodeFeatureCollection(fc, object)
+
+}
+
+func decodeFeatureCollection(fc *FeatureCollection, object map[string]interface{}) error {
+	t, ok := object["type"]
+	if !ok {
+		return errors.New("type property not defined")
+	}
+
+	if str, ok := t.(string); ok {
+		fc.Type = str
+	} else {
+		return errors.New("type property not string")
+	}
+
+	crs, ok := object["crs"]
+	if ok {
+		if c, ok := crs.(map[string]interface{}); ok {
+			fc.CRS = c
+		}
+	}
+
+	features, ok := object["features"]
+	if !ok {
+		return errors.New("features property not defined")
+	}
+
+	feas, ok := features.([]interface{})
+	if !ok {
+		return errors.New("type property not features")
+	}
+	for _, fea := range feas {
+		if f, ok := fea.(map[string]interface{}); ok {
+			fea := &Feature{}
+			err := decodeFeature(fea, f)
+			if err != nil {
+				return err
+			}
+			fc.Features = append(fc.Features, fea)
+		} else {
+			return errors.New("type property not features")
+		}
+	}
+	return nil
 }

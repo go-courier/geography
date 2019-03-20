@@ -3,10 +3,11 @@ package geojson_test
 import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-courier/geography/encoding/geojson"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
-func TestUnmarshalGeometryCollection(t *testing.T) {
+func TestGeometry_UnmarshalText(t *testing.T) {
 	rawJSON := `{"type": "GeometryCollection", "geometries": [
 		{"type": "Point", "coordinates": [102.0, 0.5]},
 		{"type": "MultiPoint", "coordinates": [[102.0, 0.5],[111,222]]},
@@ -17,17 +18,8 @@ func TestUnmarshalGeometryCollection(t *testing.T) {
 
 	]}`
 
-	g, err := geojson.UnmarshalGeometry([]byte(rawJSON))
-	if err != nil {
-		t.Fatalf("should unmarshal geometry without issue, err %v", err)
-	}
-
-	if g.Type != "GeometryCollection" {
-		t.Errorf("incorrect type, got %v", g.Type)
-	}
-
-	if len(g.Geometries) != 6 {
-		t.Errorf("should have 6 geometries but got %d", len(g.Geometries))
-	}
-	spew.Dump(g)
+	geo := &geojson.Geometry{}
+	err := geo.UnmarshalText([]byte(rawJSON))
+	require.NoError(t, err)
+	spew.Dump(geo)
 }
