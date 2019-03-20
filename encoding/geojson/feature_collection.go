@@ -9,8 +9,9 @@ import (
 
 type FeatureCollection struct {
 	coordsTransform *coordstransform.CoordsTransform
-	Type            string     `json:"type"`
-	Features        []*Feature `json:"features"`
+	Type            string                 `json:"type"`
+	Features        []*Feature             `json:"features"`
+	CRS             map[string]interface{} `json:"crs,omitempty"`
 }
 
 // New FeatureCollection
@@ -93,10 +94,23 @@ func (fc *FeatureCollection) MarshalJSON() ([]byte, error) {
 	if fcol.Features == nil {
 		fcol.Features = make([]*Feature, 0)
 	}
+	if fc.CRS != nil && len(fc.CRS) != 0 {
+		fcol.CRS = fc.CRS
+	}
 
 	return json.Marshal(fcol)
 }
 
 func (fc *FeatureCollection) ToJSON() ([]byte, error) {
 	return fc.MarshalJSON()
+}
+
+func UnmarshalFeatureCollection(data []byte) (*FeatureCollection, error) {
+	fc := &FeatureCollection{}
+	err := json.Unmarshal(data, fc)
+	if err != nil {
+		return nil, err
+	}
+
+	return fc, nil
 }

@@ -9,6 +9,7 @@ type Feature struct {
 	Type       string                 `json:"type"`
 	Geometry   Geometry               `json:"geometry"`
 	Properties map[string]interface{} `json:"properties"`
+	CRS        map[string]interface{} `json:"crs,omitempty"`
 }
 
 func (f *Feature) MarshalJSON() ([]byte, error) {
@@ -23,5 +24,19 @@ func (f *Feature) MarshalJSON() ([]byte, error) {
 		fea.Properties = f.Properties
 	}
 
+	if f.CRS != nil && len(f.CRS) != 0 {
+		fea.CRS = f.CRS
+	}
+
 	return json.Marshal(fea)
+}
+
+func UnmarshalFeature(data []byte) (*Feature, error) {
+	f := &Feature{}
+	err := json.Unmarshal(data, f)
+	if err != nil {
+		return nil, err
+	}
+
+	return f, nil
 }
