@@ -23,6 +23,10 @@ func StructToFields(v interface{}) map[string]FieldType {
 			name = strings.SplitN(name, ",", 2)[0]
 		}
 
+		if name == "-" {
+			continue
+		}
+
 		if name == "" {
 			name = ft.Name
 		}
@@ -56,6 +60,10 @@ func StructToProperties(v interface{}) map[string]interface{} {
 		if ok {
 			omitempty = strings.Contains(name, "omitempty")
 			name = strings.SplitN(name, ",", 2)[0]
+		}
+
+		if name == "-" {
+			continue
 		}
 
 		if name == "" {
