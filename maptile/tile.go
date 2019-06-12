@@ -56,7 +56,6 @@ func (t *MapTile) MarshalMVT(w *mvt.MVTWriter) error {
 			g := geo.Project(t.NewTransform(layer.Extent))
 
 			f := &mvt.Feature{
-				ID:         feat.ID(),
 				Type:       g.Type(),
 				Geometry:   g.Geometry(),
 				Properties: feat.Properties(),
@@ -64,6 +63,11 @@ func (t *MapTile) MarshalMVT(w *mvt.MVTWriter) error {
 			if f == nil || len(f.Geometry) == 0 {
 				continue
 			}
+
+			if fid, ok := feat.(FeatureID); ok {
+				f.ID = fid.ID()
+			}
+
 			features = append(features, f)
 		}
 
@@ -136,20 +140,24 @@ func (t *MapTile) AddTileLayers(tileLayers ...TileLayer) (e error) {
 	wg := sync.WaitGroup{}
 
 	result := make(chan interface{})
-	wg.Add(len(tileLayers))
 
 	for i := range tileLayers {
+		wg.Add(1)
 		go func(tileLayer TileLayer) {
-			g, err := tileLayer.Features(t)
+			defer wg.Done()
+			features, err := tileLayer.Features(t)
 			if err != nil {
 				result <- err
 				return
 			}
 			extend := uint32(0)
+
 			if tileLayerExtentConf, ok := tileLayer.(TileLayerExtentConf); ok {
 				extend = tileLayerExtentConf.Extent()
 			}
-			result <- NewLayer(tileLayer.Name(), extend, g...)
+
+			result <- NewLayer(tileLayer.Name(), extend, features...)
+
 		}(tileLayers[i])
 	}
 
@@ -165,7 +173,6 @@ func (t *MapTile) AddTileLayers(tileLayers ...TileLayer) (e error) {
 		case *Layer:
 			t.AddLayers(v)
 		}
-		wg.Done()
 	}
 	return
 }

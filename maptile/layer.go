@@ -5,9 +5,12 @@ import (
 )
 
 type Feature interface {
-	ID() uint64
 	ToGeom() geography.Geom
 	Properties() map[string]interface{}
+}
+
+type FeatureID interface {
+	ID() uint64
 }
 
 type TileLayer interface {
