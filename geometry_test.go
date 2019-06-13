@@ -63,7 +63,7 @@ func TestGeomRW(t *testing.T) {
 		db := dbGeom.OpenDB(connector)
 
 		userTable := dbGeom.Register(&Geometries{})
-		err := migration.Migrate(db, dbGeom, nil)
+		err := migration.Migrate(db, nil)
 		tt.NoError(err)
 
 		g := Geometries{
@@ -81,7 +81,7 @@ func TestGeomRW(t *testing.T) {
 			Geometry:     ToGeometry(Point{-1, 2}),
 		}
 
-		_, errInsert := db.ExecExpr(dbGeom.Insert(g, nil))
+		_, errInsert := db.ExecExpr(sqlx.InsertToDB(db, g, nil))
 		tt.NoError(errInsert)
 
 		{
@@ -97,10 +97,10 @@ func TestGeomRW(t *testing.T) {
 			spew.Dump(gForSelect)
 		}
 
-		for _, t := range dbGeom.Tables {
-			_, err := db.ExecExpr(db.DropTable(t))
+		dbGeom.Tables.Range(func(t *builder.Table, idx int) {
+			_, err := db.ExecExpr(db.Dialect().DropTable(t))
 			tt.NoError(err)
-		}
+		})
 	}
 
 }

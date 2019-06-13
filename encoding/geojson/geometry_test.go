@@ -1,10 +1,10 @@
 package geojson_test
 
 import (
-	"github.com/davecgh/go-spew/spew"
+	"testing"
+
 	"github.com/go-courier/geography/encoding/geojson"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestGeometry_UnmarshalText(t *testing.T) {
@@ -21,5 +21,5 @@ func TestGeometry_UnmarshalText(t *testing.T) {
 	geo := &geojson.Geometry{}
 	err := geo.UnmarshalText([]byte(rawJSON))
 	require.NoError(t, err)
-	spew.Dump(geo)
+	//spew.Dump(geo)
 }
