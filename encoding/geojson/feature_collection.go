@@ -3,6 +3,7 @@ package geojson
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/go-courier/geography"
 	"github.com/go-courier/geography/coordstransform"
 	"github.com/go-courier/geography/maptile"
@@ -72,10 +73,15 @@ func (fc *FeatureCollection) addMapTileFeature(feature maptile.Feature) *Feature
 	}
 
 	fe := &Feature{
-		ID:         feature.ID(),
 		Type:       "Feature",
 		Geometry:   geo,
 		Properties: feature.Properties(),
+	}
+
+	if fid, ok := feature.(interface {
+		ID() uint64
+	}); ok {
+		fe.ID = fid.ID()
 	}
 
 	fc.Features = append(fc.Features, fe)
