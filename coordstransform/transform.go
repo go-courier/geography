@@ -1,8 +1,9 @@
 package coordstransform
 
 import (
-	"github.com/go-courier/geography"
 	"math"
+
+	"github.com/go-courier/geography"
 )
 
 type CoordsTransform struct {
@@ -14,11 +15,18 @@ const (
 )
 
 func (CoordsTransform) ToEarth(point geography.Point) geography.Point {
+	if point.IsZero() {
+		return point
+	}
 	mgLon, mgLat := delta(point[0], point[1])
 	return geography.Point{point[0]*2 - mgLon, point[1]*2 - mgLat}
 }
 
 func (CoordsTransform) ToMars(point geography.Point) geography.Point {
+	if point.IsZero() {
+		return point
+	}
+
 	mgLon, mgLat := delta(point[0], point[1])
 	return geography.Point{mgLon, mgLat}
 }

@@ -14,6 +14,10 @@ import (
 
 type Point [2]float64
 
+func (p Point) IsZero() bool {
+	return p[0] == 0 && p[1] == 0
+}
+
 func (p Point) ToGeom() Geom {
 	return p
 }
