@@ -115,20 +115,14 @@ func (p Polygon) Cap() int {
 	return c
 }
 
-func (p Polygon) DrawFeature(w *mvt.FeatureWriter) {
+func (p Polygon) MarshalMVTGeometry(w mvt.MVTGeometryWriter) {
 	for _, ls := range p {
-		ls.DrawFeature(w)
+		ls.MarshalMVTGeometry(w)
 		if !ls.Closed() && ls.IsValid() {
 			// force close path
 			w.ClosePath()
 		}
 	}
-}
-
-func (p Polygon) Geometry() []uint32 {
-	w := mvt.NewFeatureWriter(p.Cap())
-	p.DrawFeature(w)
-	return w.Data()
 }
 
 func (Polygon) DataType(driverName string) string {

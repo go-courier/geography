@@ -9,10 +9,6 @@ type Feature interface {
 	Properties() map[string]interface{}
 }
 
-type FeatureID interface {
-	ID() uint64
-}
-
 type TileLayer interface {
 	Name() string
 	Fields() map[string]FieldType

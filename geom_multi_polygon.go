@@ -107,16 +107,10 @@ func (mp MultiPolygon) Cap() int {
 	return c
 }
 
-func (mp MultiPolygon) DrawFeature(w *mvt.FeatureWriter) {
+func (mp MultiPolygon) MarshalMVTGeometry(w mvt.MVTGeometryWriter) {
 	for _, p := range mp {
-		p.DrawFeature(w)
+		p.MarshalMVTGeometry(w)
 	}
-}
-
-func (mp MultiPolygon) Geometry() []uint32 {
-	w := mvt.NewFeatureWriter(mp.Cap())
-	mp.DrawFeature(w)
-	return w.Data()
 }
 
 func (MultiPolygon) DataType(driverName string) string {

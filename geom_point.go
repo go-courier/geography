@@ -93,16 +93,10 @@ func (Point) Cap() int {
 	return 3
 }
 
-func (p Point) DrawFeature(w *mvt.FeatureWriter) {
+func (p Point) MarshalMVTGeometry(w mvt.MVTGeometryWriter) {
 	w.MoveTo(1, func(i int) mvt.Coord {
 		return p
 	})
-}
-
-func (p Point) Geometry() []uint32 {
-	w := mvt.NewFeatureWriter(p.Cap())
-	p.DrawFeature(w)
-	return w.Data()
 }
 
 func (p Point) MarshalWKT(w *wkt.WKTWriter) {

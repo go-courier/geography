@@ -2,8 +2,10 @@ package maptile
 
 import (
 	"fmt"
-	"github.com/go-courier/geography/coordstransform"
 	"testing"
+
+	"github.com/davecgh/go-spew/spew"
+	"github.com/go-courier/geography/coordstransform"
 
 	"github.com/go-courier/geography/encoding/mvt"
 	"github.com/go-courier/geography/encoding/mvt/vector_tile"
@@ -13,6 +15,22 @@ import (
 	"github.com/go-courier/geography"
 )
 
+func TestMapTile_UnmarshalMVT(t *testing.T) {
+	mt := NewMapTile(5, 25, 13)
+	mt.AddTileLayers(
+		LayerPoi{N: "1"},
+	)
+
+	data, err := mvt.MarshalMVT(mt)
+	require.NoError(t, err)
+
+	mt2 := NewMapTile(5, 25, 13)
+	err2 := mvt.UnmarshalMVT(data, mt2)
+	require.NoError(t, err2)
+
+	spew.Dump(mt2)
+}
+
 func TestTile(t *testing.T) {
 	// https://overpass-api.de/api/map?bbox=101.250,21.943,112.500,31.952
 	mt := NewMapTile(5, 25, 13)
@@ -20,8 +38,8 @@ func TestTile(t *testing.T) {
 	min := geography.Point{101.250, 21.94304553343818}
 	max := geography.Point{112.5, 31.952162238024968}
 
-	require.Equal(t, geography.Point{0, 4096}, mt.NewTransform(4096)(min))
-	require.Equal(t, geography.Point{4096, 0}, mt.NewTransform(4096)(max))
+	require.Equal(t, geography.Point{0, 4096}, mt.NewLonLatToPixelXYTransform(4096)(min))
+	require.Equal(t, geography.Point{4096, 0}, mt.NewLonLatToPixelXYTransform(4096)(max))
 
 	mt.AddTileLayers(
 		LayerPoi{N: "1"},
@@ -94,9 +112,11 @@ func (LayerPoi) Fields() map[string]FieldType {
 
 func (LayerPoi) Features(tile *MapTile) ([]Feature, error) {
 	return []Feature{
-		FeaturePoi{Geom: geography.Point{110, 20}},
-		FeaturePoi{Geom: geography.LineString{{110, 22}, {111, 23}}},
-		FeaturePoi{Geom: geography.Polygon{{{110, 24}, {110, 24}, {110, 24}}}},
+		//FeaturePoi{Geom: geography.Point{110, 20}},
+		FeaturePoi{Geom: geography.LineString{{110, 22}, {110.5, 23}, {111, 24}, {112, 25}}},
+		//FeaturePoi{Geom: geography.Polygon{{
+		//	{110, 24}, {111, 25}, {110, 25}, {110, 24},
+		//}}},
 	}, nil
 }
 
@@ -104,7 +124,7 @@ type FeaturePoi struct {
 	geography.Geom
 }
 
-func (FeaturePoi) ID() uint64  {
+func (FeaturePoi) ID() uint64 {
 	return 1
 }
 

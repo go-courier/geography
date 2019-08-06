@@ -98,24 +98,18 @@ func (mls *MultiLineString) UnmarshalWKB(r *wkb.WKBReader, order binary.ByteOrde
 	return nil
 }
 
+func (mls MultiLineString) MarshalMVTGeometry(w mvt.MVTGeometryWriter) {
+	for _, ls := range mls {
+		ls.MarshalMVTGeometry(w)
+	}
+}
+
 func (mls MultiLineString) Cap() int {
 	c := 0
 	for _, ls := range mls {
 		c += ls.Cap()
 	}
 	return c
-}
-
-func (mls MultiLineString) DrawFeature(w *mvt.FeatureWriter) {
-	for _, ls := range mls {
-		ls.DrawFeature(w)
-	}
-}
-
-func (mls MultiLineString) Geometry() []uint32 {
-	w := mvt.NewFeatureWriter(mls.Cap())
-	mls.DrawFeature(w)
-	return w.Data()
 }
 
 func (MultiLineString) DataType(driverName string) string {

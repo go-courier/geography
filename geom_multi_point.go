@@ -108,16 +108,10 @@ func (mp MultiPoint) Cap() int {
 	return 1 + 2*len(mp)
 }
 
-func (mp MultiPoint) DrawFeature(w *mvt.FeatureWriter) {
+func (mp MultiPoint) MarshalMVTGeometry(w mvt.MVTGeometryWriter) {
 	w.MoveTo(len(mp), func(i int) mvt.Coord {
 		return mp[i]
 	})
-}
-
-func (mp MultiPoint) Geometry() []uint32 {
-	w := mvt.NewFeatureWriter(mp.Cap())
-	mp.DrawFeature(w)
-	return w.Data()
 }
 
 func (MultiPoint) DataType(driverName string) string {

@@ -1,19 +1,18 @@
 package maptile
 
 import (
-	"math"
 	"sync"
 
-	"github.com/go-courier/geography/encoding/mvt"
-
 	"github.com/go-courier/geography"
+	"github.com/go-courier/geography/encoding/mvt"
 )
 
 func NewMapTile(z, x, y uint32) *MapTile {
 	return &MapTile{
-		Z: z,
-		X: x,
-		Y: y,
+		Z:      z,
+		X:      x,
+		Y:      y,
+		Layers: map[string]*Layer{},
 	}
 }
 
@@ -22,7 +21,8 @@ type MapTile struct {
 	Z               uint32
 	X               uint32
 	Y               uint32
-	Layers          []*Layer
+	Layers          map[string]*Layer
+	LayerNames      []string
 }
 
 type CoordsTransform interface {
@@ -34,14 +34,14 @@ func (t *MapTile) SetCoordsTransform(coordsTransform CoordsTransform) {
 	t.coordsTransform = coordsTransform
 }
 
-func (t *MapTile) MarshalMVT(w *mvt.MVTWriter) error {
+func (t *MapTile) MarshalMVT(mvtWriter mvt.MVTWriter) error {
 	for i := range t.Layers {
 		layer := t.Layers[i]
 		if layer == nil || len(layer.Features) == 0 {
 			continue
 		}
 
-		features := make([]*mvt.Feature, 0)
+		transform := t.NewLonLatToPixelXYTransform(layer.Extent)
 
 		for i := range layer.Features {
 			feat := layer.Features[i]
@@ -49,49 +49,63 @@ func (t *MapTile) MarshalMVT(w *mvt.MVTWriter) error {
 				continue
 			}
 
-			geo := feat.ToGeom()
-			if geo == nil {
-				continue
-			}
-			g := geo.Project(t.NewTransform(layer.Extent))
+			f := &featurePayload{Feature: feat, lonLatToPixelXY: transform}
 
-			f := &mvt.Feature{
-				Type:       g.Type(),
-				Geometry:   g.Geometry(),
-				Properties: feat.Properties(),
+			if f.IsValid() {
+				mvtWriter.WriteFeature(layer.Name, layer.Extent, f)
 			}
-			if f == nil || len(f.Geometry) == 0 {
-				continue
-			}
-
-			if fid, ok := feat.(FeatureID); ok {
-				f.ID = fid.ID()
-			}
-
-			features = append(features, f)
 		}
 
-		w.WriteLayer(layer.Name, layer.Extent, features...)
 	}
 	return nil
 }
 
-func (t *MapTile) NewTransform(extent uint32) geography.Transform {
-	n := uint32(TrailingZeros32(extent))
-	z := uint32(t.Z) + n
+func (t *MapTile) UnmarshalMVT(r mvt.MVTReader) error {
+	return r.RangeFeature(func(name string, extent uint32, feature mvt.Feature) error {
 
-	minx := float64(t.X << n)
-	miny := float64(t.Y << n)
+		layer, ok := t.Layers[name]
+		if !ok {
+			layer = &Layer{
+				Name:   name,
+				Extent: extent,
+			}
+			t.AddLayers(layer)
+		}
+
+		transform := t.NewPixelXYToLonLatTransform(layer.Extent)
+
+		feat, err := featureFromMVTFeature(feature, transform)
+		if err != nil {
+			return err
+		}
+		layer.Features = append(layer.Features, feat)
+		return nil
+	})
+}
+
+func (t *MapTile) NewLonLatToPixelXYTransform(extent uint32) geography.Transform {
+	projection := mvt.NewProjection(t.Z, t.X, t.Y, extent)
 
 	return func(p geography.Point) geography.Point {
 		if t.coordsTransform != nil {
 			p = t.coordsTransform.ToMars(p)
 		}
-		x, y := lonLatToPixelXY(p[0], p[1], z)
-		return geography.Point{
-			math.Floor(x - minx),
-			math.Floor(y - miny),
+		x, y := projection.LonLatToTilePixelXY(p[0], p[1])
+		return geography.Point{x, y}
+	}
+}
+
+func (t *MapTile) NewPixelXYToLonLatTransform(extent uint32) geography.Transform {
+	projection := mvt.NewProjection(t.Z, t.X, t.Y, extent)
+
+	return func(p geography.Point) geography.Point {
+		lon, lat := projection.TilePixelXYToLonLat(p[0], p[1])
+		point := geography.Point{lon, lat}
+
+		if t.coordsTransform != nil {
+			return t.coordsTransform.ToEarth(p)
 		}
+		return point
 	}
 }
 
@@ -133,7 +147,13 @@ func (t *MapTile) BBox() geography.Bound {
 }
 
 func (t *MapTile) AddLayers(layers ...*Layer) {
-	t.Layers = append(t.Layers, layers...)
+	for i := range layers {
+		layer := layers[i]
+		if _, ok := t.Layers[layer.Name]; !ok {
+			t.Layers[layer.Name] = layer
+			t.LayerNames = append(t.LayerNames, layer.Name)
+		}
+	}
 }
 
 func (t *MapTile) AddTileLayers(tileLayers ...TileLayer) (e error) {

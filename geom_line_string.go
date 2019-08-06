@@ -84,7 +84,7 @@ func (ls LineString) IsValid() bool {
 	return n >= 2
 }
 
-func (ls LineString) DrawFeature(w *mvt.FeatureWriter) {
+func (ls LineString) MarshalMVTGeometry(w mvt.MVTGeometryWriter) {
 	if !ls.IsValid() {
 		return
 	}
@@ -109,12 +109,6 @@ func (ls LineString) DrawFeature(w *mvt.FeatureWriter) {
 
 func (ls LineString) Cap() int {
 	return 2 + 2*len(ls)
-}
-
-func (ls LineString) Geometry() []uint32 {
-	w := mvt.NewFeatureWriter(ls.Cap())
-	ls.DrawFeature(w)
-	return w.Data()
 }
 
 func (LineString) DataType(driverName string) string {

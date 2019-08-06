@@ -2,6 +2,8 @@ package geography
 
 import (
 	"math"
+
+	"github.com/go-courier/geography/encoding/mvt"
 )
 
 var emptyBound = Bound{Min: Point{1, 1}, Max: Point{-1, -1}}
@@ -32,8 +34,8 @@ func (b Bound) Cap() int {
 	return b.AsPolygon().Cap()
 }
 
-func (b Bound) Geometry() []uint32 {
-	return b.AsPolygon().Geometry()
+func (b Bound) MarshalMVTGeometry(w mvt.MVTGeometryWriter) {
+	b.AsPolygon().MarshalMVTGeometry(w)
 }
 
 func (b Bound) Project(transform Transform) Geom {

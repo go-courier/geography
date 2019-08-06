@@ -7,14 +7,10 @@ import (
 type Transform func(point Point) Point
 
 type Geom interface {
+	Type() string
+	ToGeom() Geom
 	Clip(b Bound) Geom
 	Project(transform Transform) Geom
-
-	Type() string
-
-	ToGeom() Geom
-	Geometry() []uint32
-
 	Bound() Bound
 	Equal(g Geom) bool
 }
