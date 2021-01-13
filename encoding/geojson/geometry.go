@@ -117,6 +117,10 @@ func decodePoint(data interface{}) (geography.Point, error) {
 		return result, fmt.Errorf("not a valid points, got %v", data)
 	}
 	for k, point := range points {
+		// 丢弃高度
+		if k > 1 {
+			continue
+		}
 		if f, ok := point.(float64); ok {
 			result[k] = f
 		} else {
