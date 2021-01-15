@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/davecgh/go-spew v1.1.1
-	github.com/go-courier/ptr v1.0.0
+	github.com/go-courier/ptr v1.0.1
 	github.com/go-courier/reflectx v1.3.3
 	github.com/go-courier/sqlx/v2 v2.8.1
 	github.com/golang/protobuf v1.3.1
