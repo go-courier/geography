@@ -136,11 +136,10 @@ func (b Bound) Union(other Bound) Bound {
 	if other.IsEmpty() {
 		return b
 	}
-
-	nextB := b.Extend(other.Min)
-	nextB = b.Extend(other.Max)
-
-	return nextB
+	return b.Extend(other.Min).
+		Extend(other.Max).
+		Extend(other.LeftTop()).
+		Extend(other.RightBottom())
 }
 
 func (b Bound) Center() Point {
