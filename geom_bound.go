@@ -139,8 +139,6 @@ func (b Bound) Union(other Bound) Bound {
 
 	nextB := b.Extend(other.Min)
 	nextB = b.Extend(other.Max)
-	nextB = b.Extend(other.LeftTop())
-	nextB = b.Extend(other.RightBottom())
 
 	return nextB
 }
